@@ -1,0 +1,12 @@
+- [x] Run tests and check coverage
+- [x] Refactor cli.py for better error handling and modularity
+- [x] Refactor metrics.py to separate concerns and improve readability
+- [x] Add type hints for better code quality
+- [x] Update tests if needed after refactoring
+- [x] Run tests again to ensure refactoring doesn't break functionality
+- [x] Test and refactor Hello World.py
+- [x] Test and refactor README.md
+- [x] Test and refactor urls.txt
+- [x] Test and refactor run script
+- [x] Test and refactor requirements.txt
+- [x] Test and refactor .coverage and coverage.json
