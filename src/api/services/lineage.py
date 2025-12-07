@@ -201,8 +201,9 @@ def create_lineage_for_artifact(
         parent_artifact = None
 
         for artifact in all_artifacts:
-            # Match by name containing the model ID
-            if parent_model_id in artifact.name or artifact.name in parent_model_id:
+            # Match by exact name only to avoid false positives
+            # (e.g., "superbert" should NOT match parent "bert")
+            if artifact.name == parent_model_id:
                 parent_artifact = artifact
                 break
 

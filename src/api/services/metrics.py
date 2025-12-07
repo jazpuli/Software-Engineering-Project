@@ -26,26 +26,46 @@ WEIGHTS = {
 
 
 def compute_net_score(metrics: dict) -> float:
-    """Compute weighted average of metrics (ignores latencies and treescore)."""
+    """Compute weighted average of metrics (ignores latencies and treescore).
+
+    When reviewedness is unavailable (-1), we exclude it from both the numerator
+    and denominator to ensure fair comparison between models with and without
+    GitHub repositories.
+    """
     size_avg = sum(metrics["size_score"].values()) / 4  # avg of 4 hardware targets
 
-    score = 0.0
-    score += WEIGHTS["ramp_up_time"] * metrics["ramp_up_time"]
-    score += WEIGHTS["bus_factor"] * metrics["bus_factor"]
-    score += WEIGHTS["license"] * metrics["license"]
-    score += WEIGHTS["performance_claims"] * metrics["performance_claims"]
-    score += WEIGHTS["dataset_and_code_score"] * metrics["dataset_and_code_score"]
-    score += WEIGHTS["dataset_quality"] * metrics["dataset_quality"]
-    score += WEIGHTS["code_quality"] * metrics["code_quality"]
-    score += WEIGHTS["size_score"] * size_avg
+    # Track which weights are actually used for normalization
+    total_weight = 0.0
+    weighted_sum = 0.0
 
-    # Handle reproducibility (0, 0.5, or 1)
-    score += WEIGHTS["reproducibility"] * metrics["reproducibility"]
+    # Always-available metrics
+    always_available = [
+        ("ramp_up_time", metrics["ramp_up_time"]),
+        ("bus_factor", metrics["bus_factor"]),
+        ("license", metrics["license"]),
+        ("performance_claims", metrics["performance_claims"]),
+        ("dataset_and_code_score", metrics["dataset_and_code_score"]),
+        ("dataset_quality", metrics["dataset_quality"]),
+        ("code_quality", metrics["code_quality"]),
+        ("size_score", size_avg),
+        ("reproducibility", metrics["reproducibility"]),
+    ]
 
-    # Handle reviewedness (-1 means not available, treat as 0 for score)
+    for key, value in always_available:
+        weighted_sum += WEIGHTS[key] * value
+        total_weight += WEIGHTS[key]
+
+    # Handle reviewedness (-1 means not available, exclude from calculation)
     reviewedness = metrics["reviewedness"]
     if reviewedness >= 0:
-        score += WEIGHTS["reviewedness"] * reviewedness
+        weighted_sum += WEIGHTS["reviewedness"] * reviewedness
+        total_weight += WEIGHTS["reviewedness"]
+
+    # Normalize to ensure score is properly weighted
+    if total_weight > 0:
+        score = weighted_sum / total_weight
+    else:
+        score = 0.0
 
     return round(score, 3)
 

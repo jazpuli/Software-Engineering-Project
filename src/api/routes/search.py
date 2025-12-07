@@ -101,17 +101,16 @@ async def search_artifacts(
     type_filter = artifact_type.value if artifact_type else None
     all_artifacts = crud.list_artifacts(db, artifact_type=type_filter, limit=1000)
 
-    # Filter by regex match on name
-    matching = []
-    for artifact in all_artifacts:
-        if pattern.search(artifact.name):
-            matching.append(artifact)
-            if len(matching) >= limit:
-                break
+    # Filter by regex match on name - find ALL matches first for accurate total
+    matching = [artifact for artifact in all_artifacts if pattern.search(artifact.name)]
+
+    # Apply limit to results, but report true total
+    total_matches = len(matching)
+    limited_results = matching[:limit]
 
     return SearchResponse(
         query=query,
-        results=[artifact_to_response(a) for a in matching],
-        total=len(matching),
+        results=[artifact_to_response(a) for a in limited_results],
+        total=total_matches,
     )
 

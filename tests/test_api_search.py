@@ -73,12 +73,16 @@ class TestSearch:
         assert data["results"][0]["type"] == "model"
 
     def test_search_limit(self, client: TestClient):
-        """Test search result limit."""
+        """Test search result limit returns correct total."""
         # Create many artifacts
         for i in range(10):
             client.post("/artifacts/model", json={"name": f"model-{i}", "url": f"https://a.com/{i}"})
 
         response = client.get("/artifacts/search?query=model&limit=5")
         assert response.status_code == 200
-        assert len(response.json()["results"]) == 5
+        data = response.json()
+        # Results should be limited to 5
+        assert len(data["results"]) == 5
+        # But total should report all 10 matches
+        assert data["total"] == 10
 
