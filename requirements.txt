@@ -1,3 +1,13 @@
-requests
-pytest
-pytest-cov
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+sqlalchemy>=2.0.25
+boto3>=1.34.0
+pydantic>=2.5.0
+python-multipart>=0.0.6
+python-dotenv>=1.0.0
+requests>=2.31.0
+pytest>=7.4.0
+pytest-cov>=4.1.0
+httpx>=0.26.0
+moto[s3]>=5.0.0
+ruff>=0.1.0
